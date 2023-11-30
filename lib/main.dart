@@ -1,121 +1,82 @@
+import 'dart:io';
+import 'dart:typed_data'; // Import the 'dart:typed_data' library
+import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-void main()=> runApp(const MyApp());
-class MyApp extends StatelessWidget{
-  const MyApp({Key?key}):super(key: key);
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  Future<void> uploadFile(String url, List<int> bytes) async {
+    var request = http.MultipartRequest('POST', Uri.parse(url))
+      ..files.add(
+        http.MultipartFile.fromBytes(
+          'fileField',
+          Uint8List.fromList(bytes),
+          filename: 'filename.pdf',
+        ),
+      );
+
+    try {
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        print('File uploaded successfully');
+        // Handle the response from the backend if needed
+      } else {
+        print('Failed to upload file. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error uploading file: $error');
+    }
+  }
+
+  void pickAndUploadFile() async {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
+
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.first;
+      print('File path: ${file.path}');
+      print('File size: ${file.size}');
+
+      try {
+        // Read the file content as bytes
+        Uint8List fileBytes = await File(file.path!).readAsBytes();
+        print('File bytes: $fileBytes');
+
+        if (fileBytes.isNotEmpty) {
+          // Continue with the upload
+          final backendUrl = 'https://2687-2401-4900-26ad-d62d-416-6df2-f0cb-eb04.ngrok-free.app/upload';
+          uploadFile(backendUrl, fileBytes);
+        } else {
+          print('File bytes are empty');
+        }
+      } catch (e) {
+        print('Error reading file: $e');
+      }
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Zebra Print - Razorpay',
-      theme: ThemeData(
-          primarySwatch: Colors.blue
-      ),
-      home: const MyHomePage(title: 'Zebra Print'),
-    );
-  }
-}
-class MyHomePage extends StatefulWidget{
-  const MyHomePage({Key? key, required this.title}):super(key: key);
-  final String title;
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage>{
-  int totalAmount=0;
-  late Razorpay _razorpay;
-  @override
-  void initState(){
-    super.initState();
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS,_handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR,_handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET,_handleExternalWallet);
-  }
-  @override
-  void dispose(){
-    super.dispose();
-    _razorpay.clear();
-  }
-
-  void launchPayment() async{
-    var options = {
-      'key':'rzp_test_u2BdyK2fSZ8VSh',
-      'amount':totalAmount*100,
-      'name':'Zebra Print.',
-      'description': 'Test Payment for Zebra Printer App',
-      'prefill':{'contact':'','email':''},
-      'external':{'wallets':[]}
-    };
-    try{
-      _razorpay.open(options);
-    }catch(e){
-      debugPrint(e.toString());
-    }
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    Fluttertoast.showToast(msg: 'Error'+response.code.toString() + ' '+ response.message.toString(),
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0
-    );
-  }
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    Fluttertoast.showToast(msg: 'Success'+response.paymentId.toString(),
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0
-    );
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    Fluttertoast.showToast(msg: 'Success'+response.walletName.toString(),
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.green,
-        textColor: Colors.black,
-        fontSize: 16.0
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Demo to make payment inside flutter app'),
-            LimitedBox(
-              maxWidth: 150.0,
-              child: TextField(
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: 'Enter Amount'
-                ),
-                onChanged: (val){
-                  setState(() {
-                    totalAmount = num.parse(val).toInt();
-                  });
-                },
-              ),
+      home: Scaffold(
+        backgroundColor: Colors.green[100],
+        body: Center(
+          child: MaterialButton(
+            onPressed: () {
+              pickAndUploadFile();
+            },
+            child: Text(
+              'Pick and send file to backend',
+              style: TextStyle(color: Colors.white),
             ),
-            const SizedBox(height: 15.0,),
-            ElevatedButton(onPressed:(){ launchPayment();},child: const Text('PAY NOW'), )
-          ],
+            color: Colors.green,
+          ),
         ),
       ),
     );
