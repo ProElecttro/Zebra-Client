@@ -99,7 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
       textColor: Colors.white,
       fontSize: 16.0,
     );
-    _createPdf();
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
@@ -113,17 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
       fontSize: 16.0,
     );
   }
-
-    void _createPdf() async {
-      final doc = pw.Document();
-
-      // ... (PDF content creation code)
-
-      // Print the document using the iOS or Android print service:
-      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => doc.save());
-
-      // ... (Share the document to other applications or save with path_provider)
-    }
 
   @override
   Widget build(BuildContext context) {
