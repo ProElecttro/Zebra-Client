@@ -3,6 +3,11 @@
         android:label="frontend"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="com.google.android.gms.ads.ca-app-pub-8668850605057666~2866310251"
+            android:value="ca-app-pub-8668850605057666~2866310251"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
