@@ -1,44 +1,29 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
-void main() => runApp(const MyApp());
+Map data = {};
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Zebra Print - Razorpay',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: MyHomePage(
-        title: 'Zebra Print',
-        initialAmount: 0,
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({
+class Payment extends StatefulWidget {
+  const Payment({
     Key? key,
     required this.title,
     required this.initialAmount,
+    required this.filepath
   }) : super(key: key);
 
   final String title;
   final int initialAmount;
-  ///////////////////////////////////////////////////////
+  final String filepath;
 
-  _MyHomePageState createState() => _MyHomePageState();
+  _PaymentState createState() => _PaymentState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _PaymentState extends State<Payment> {
   late Razorpay _razorpay;
 
   @override
@@ -57,6 +42,20 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
     _razorpay.clear();
   }
+
+  void _printExistingPdf(String filePath) async {
+    File file = File(filePath);
+
+    if (await file.exists()) {
+      Uint8List fileBytes = await File(filePath).readAsBytes();
+
+      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => fileBytes);
+      print('Print Successful');
+    } else {
+      print("File does not exist");
+    }
+  }
+
 
   void launchPayment() async {
     var options = {
@@ -99,6 +98,8 @@ class _MyHomePageState extends State<MyHomePage> {
       textColor: Colors.white,
       fontSize: 16.0,
     );
+    print('payment successfully done');
+    // Navigator.pushReplacementNamed(context, '/print');
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
@@ -129,9 +130,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                launchPayment();
+                _printExistingPdf(widget.filepath);
               },
-              child: const Text('PAY NOW'),
+              child: const Text('Print'),
             )
           ],
         ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() {
   runApp(MyApp());
@@ -99,8 +98,6 @@ class _SignupPageState extends State<SignupPage> {
                 },
                 child: const Text("Sign up with Google"),
               ),
-              const SizedBox(height: 20),
-              AdManagerBannerAd(),
             ],
           ),
         ),
@@ -126,35 +123,5 @@ class _SignupPageState extends State<SignupPage> {
 
   void _registerUser() {
     // Implement user registration logic
-  }
-}
-
-class AdManagerBannerAd extends StatefulWidget {
-  @override
-  State createState() => AdManagerBannerAdState();
-}
-
-class AdManagerBannerAdState extends State<AdManagerBannerAd> {
-  late BannerAd _ad;
-
-  @override
-  void initState() {
-    super.initState();
-    _ad = BannerAd(
-      adUnitId: 'your-admob-banner-ad-id',
-      size: AdSize.banner,
-      request: AdRequest(),
-      listener: BannerAdListener(),
-    )..load();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.bottomCenter,
-      child: AdWidget(ad: _ad),
-      width: _ad.size.width.toDouble(),
-      height: _ad.size.height.toDouble(),
-    );
   }
 }
