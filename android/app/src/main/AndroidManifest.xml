@@ -2,7 +2,8 @@
     <application
         android:label="frontend"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
 
         <meta-data
             android:name="com.google.android.gms.ads.ca-app-pub-8668850605057666~2866310251"

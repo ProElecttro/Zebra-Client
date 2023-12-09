@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -10,10 +8,10 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const Print());
 }
 
-class MyApp extends StatelessWidget {
+class Print extends StatelessWidget {
   static const customSwatch = MaterialColor(
     0xFFFF5252,
     <int, Color>{
@@ -30,7 +28,7 @@ class MyApp extends StatelessWidget {
     },
   );
 
-  const MyApp({Key? key}) : super(key: key);
+  const Print({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +128,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void _printExistingPdf() async {
     // import 'package:flutter/services.dart';
     final pdf = await rootBundle.load('assets/document.pdf');
-    await Printing.layoutPdf(onLayout: (_) => pdf.buffer.asUint8List());
+    await Printing.layoutPdf(
+      onLayout: (_) => pdf.buffer.asUint8List(),
+      dynamicLayout: true,
+
+    );
   }
 
   /// more advanced PDF styling

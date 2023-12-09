@@ -57,15 +57,7 @@ class MyApp extends StatelessWidget {
               final int cost = responseBody['cost'];
               print('Amount: ${cost}');
               // Navigate to the payment page with the amount, title, and file
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MyHomePage(
-                    title: 'Zebra Print',
-                    initialAmount: cost,
-                  ),
-                ),
-              );
+
             } else {
               print('Response body does not contain the "cost" field.');
             }
