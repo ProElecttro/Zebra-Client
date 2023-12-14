@@ -99,7 +99,7 @@ class _PaymentState extends State<Payment> {
       fontSize: 16.0,
     );
     print('payment successfully done');
-    // Navigator.pushReplacementNamed(context, '/print');
+    Navigator.pushReplacementNamed(context, '/print');
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {

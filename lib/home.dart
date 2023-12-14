@@ -24,8 +24,9 @@ class Home extends StatefulWidget {
 class Files {
   String filename;
   String filepath;
+  int cost;
 
-  Files({required this.filename, required this.filepath});
+  Files({required this.filename, required this.filepath, required this.cost});
 }
 
 class _HomeState extends State<Home> {
@@ -60,9 +61,6 @@ class _HomeState extends State<Home> {
     if (result != null && result.files.isNotEmpty) {
       final file = result.files.first;
 
-      print('File path: ${file.path}');
-      print('File size: ${file.size}');
-
       try {
         // Read the file content as bytes
         Uint8List fileBytes = await File(file.path!).readAsBytes();
@@ -70,15 +68,8 @@ class _HomeState extends State<Home> {
         print('File bytes: $fileBytes');
 
         if (fileBytes.isNotEmpty) {
-          setState(() {
-            files.insert(0, Files(filename: file.name, filepath: file.path!));
-          });
 
-          if(files.length > 10){
-            files.removeLast();
-          }
-
-          const backendUrl = 'https://2e1a-2401-4900-4e68-f807-8087-322d-d8c0-24d9.ngrok-free.app/upload';
+          const backendUrl = 'https://c64d-2401-4900-6317-6b76-790f-95e9-7b84-d96c.ngrok-free.app/upload';
           final response = await uploadFile(backendUrl, fileBytes);
 
           if (response.statusCode == 200) {
@@ -87,18 +78,26 @@ class _HomeState extends State<Home> {
             if (responseBody.containsKey('cost')) {
               // Extract and set the amount
               final int cost = responseBody['cost'];
-              print('response bode: ${responseBody}');
-              print('Amount: ${cost}');
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PDFPreviewScreen(
-                    pdfPath: file.path!,
-                    cost: cost,
-                  ),
-                ),
-              );
+              setState(() {
+                files.insert(0, Files(filename: file.name, filepath: file.path!, cost: cost));
+              });
+
+              if(files.length > 10){
+                files.removeLast();
+              }
+
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => PDFPreviewScreen(
+              //       pdfPath: file.path!,
+              //       cost: cost,
+              //     ),
+              //   ),
+              // );
+
+              previewFile(file.path!, cost);
 
             } else {
               print('Response body does not contain the "cost" field.');
@@ -115,6 +114,19 @@ class _HomeState extends State<Home> {
     }
   }
 
+  void previewFile(filepath, cost){
+    print('File path: $filepath');
+    print('Cost: $cost');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PDFPreviewScreen(
+          pdfPath: filepath,
+          cost: cost,
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -188,25 +200,30 @@ class _HomeState extends State<Home> {
                   scrollDirection: Axis.vertical,
                   itemCount: files.length,
                   itemBuilder: (context, index) {
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              files[index].filename,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18
+                    return GestureDetector(
+                      onTap: (){
+                        previewFile(files[index].filepath, files[index].cost);
+                      },
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                files[index].filename,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(files[index].filepath)
-                          ],
+                              const SizedBox(height: 4),
+                              Text(files[index].filepath)
+                            ],
+                          ),
                         ),
                       ),
                     );
